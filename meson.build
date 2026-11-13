@@ -34,6 +34,10 @@ endif
 
 cglm_inc = include_directories('include')
 
+if not get_option('validate')
+    cglm_args += '-DCGLM_VALIDATE_OFF'
+endif
+
 cglm_src = files(
     'src/euler.c',
     'src/affine.c',

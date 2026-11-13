@@ -44,5 +44,6 @@
 #include "ray.h"
 #include "affine2d.h"
 #include "affine2d-post.h"
+#include "validate.h"
 
 #endif /* cglm_h */

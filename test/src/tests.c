@@ -90,3 +90,6 @@
 #undef GLM_PREFIX
 
 /*---------------------------------------------------------------------------*/
+
+/* header-only checked API, single implementation */
+#include "test_validate.h"

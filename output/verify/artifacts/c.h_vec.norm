@@ -1,0 +1,26 @@
+h_vec:
+:
+endbr64
+movss	(%rdi), %xmm2
+movss	4(%rdi), %xmm3
+movss	8(%rdi), %xmm1
+mulss	%xmm3, %xmm3
+movaps	%xmm2, %xmm0
+mulss	%xmm2, %xmm0
+mulss	%xmm1, %xmm1
+addss	%xmm3, %xmm0
+addss	%xmm1, %xmm0
+movss	.LC0(%rip), %xmm1
+sqrtss	%xmm0, %xmm0
+comiss	%xmm0, %xmm1
+ja	.L8
+movss	.LC2(%rip), %xmm1
+divss	%xmm0, %xmm1
+mulss	%xmm1, %xmm2
+movss	%xmm2, (%rsi)
+movss	4(%rdi), %xmm0
+mulss	%xmm1, %xmm0
+movss	%xmm0, 4(%rsi)
+mulss	8(%rdi), %xmm1
+movss	%xmm1, 8(%rsi)
+ret

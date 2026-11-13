@@ -15,6 +15,7 @@ option(CGLM_SHARED "Shared build" ON)
 option(CGLM_STATIC "Static build" OFF)
 option(CGLM_USE_C99 "" OFF)
 option(CGLM_USE_TEST "Enable Tests" OFF)
+option(CGLM_VALIDATE "Enable input validation (zero/near-zero vector and singular matrix checks)" ON)
 
 if(CMAKE_SYSTEM_NAME STREQUAL WASI)
   set(CGLM_STATIC ON CACHE BOOL "Static option" FORCE)
@@ -148,6 +149,11 @@ target_include_directories(${PROJECT_NAME}
 add_library(${PROJECT_NAME}_headers INTERFACE)
 target_include_directories(${PROJECT_NAME}_headers INTERFACE
   ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+if(NOT CGLM_VALIDATE)
+  target_compile_definitions(${PROJECT_NAME} PUBLIC CGLM_VALIDATE_OFF)
+  target_compile_definitions(${PROJECT_NAME}_headers INTERFACE CGLM_VALIDATE_OFF)
+endif()
 
 # Test Configuration
 if(CGLM_USE_TEST)

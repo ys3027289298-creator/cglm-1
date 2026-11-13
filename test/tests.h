@@ -384,6 +384,12 @@ TEST_DECLARE(glmc_perlin_vec2)
 /* utils */
 TEST_DECLARE(clamp)
 
+/* validate */
+TEST_DECLARE(validate_zero_vector_detected)
+TEST_DECLARE(validate_singular_matrix_detected)
+TEST_DECLARE(validate_dest_untouched_on_failure)
+TEST_DECLARE(validate_normal_input_bitexact)
+
 /* euler */
 TEST_DECLARE(glm_euler_xyz_quat_rh) 
 TEST_DECLARE(glm_euler_xzy_quat_rh) 
@@ -1610,6 +1616,12 @@ TEST_LIST {
   
   /* utils */
   TEST_ENTRY(clamp)
+
+  /* validate */
+  TEST_ENTRY(validate_zero_vector_detected)
+  TEST_ENTRY(validate_singular_matrix_detected)
+  TEST_ENTRY(validate_dest_untouched_on_failure)
+  TEST_ENTRY(validate_normal_input_bitexact)
 
   /* euler */
   TEST_ENTRY(glm_euler_xyz_quat_rh) 

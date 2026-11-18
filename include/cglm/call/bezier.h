@@ -12,6 +12,7 @@ extern "C" {
 #endif
 
 #include "../common.h"
+#include "../bezier.h"
 
 CGLM_EXPORT
 float
@@ -24,6 +25,32 @@ glmc_hermite(float s, float p0, float t0, float t1, float p1);
 CGLM_EXPORT
 float
 glmc_decasteljau(float prm, float p0, float c0, float c1, float p1);
+
+CGLM_EXPORT
+void
+glmc_bezier_eval(int degree, CGLM_CONST vec2 *ctrl, float s, vec2 dest);
+
+CGLM_EXPORT
+bool
+glmc_bezier_fit_lsq(CGLM_CONST vec2 *pts,
+                    size_t      npts,
+                    int         degree,
+                    vec2       *ctrl);
+
+CGLM_EXPORT
+float
+glmc_bezier_fit_error(CGLM_CONST vec2 *pts,
+                      size_t      npts,
+                      int         degree,
+                      CGLM_CONST vec2 *ctrl,
+                      float      *mse);
+
+CGLM_EXPORT
+bool
+glmc_bezier_fit(CGLM_CONST vec2 *pts,
+                size_t      npts,
+                const glm_bezier_fit_opts   *opts,
+                glm_bezier_fit_result       *dest);
 
 #ifdef __cplusplus
 }

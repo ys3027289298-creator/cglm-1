@@ -151,6 +151,7 @@ For backwards compatibility, you can also `#define CGLM_NO_ANONYMOUS_STRUCT` to 
 - easing functions
 - curves
 - curve interpolation helpers (SMC, deCasteljau...)
+- least squares bezier fitting (adaptive error, automatic degree raising)
 - comversion helpers from cglm types to Apple's simd library to pass cglm types to Metal GL without packing them on both sides
 - ray intersection helpers
 ---

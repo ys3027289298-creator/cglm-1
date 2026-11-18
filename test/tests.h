@@ -508,6 +508,7 @@ TEST_DECLARE(glmc_quat_make)
 
 /* bezier */
 TEST_DECLARE(bezier)
+TEST_DECLARE(bezier_fit)
 
 /* vec2 */
 TEST_DECLARE(MACRO_GLM_VEC2_ONE_INIT)
@@ -1735,6 +1736,7 @@ TEST_LIST {
 
   /* bezier */
   TEST_ENTRY(bezier)
+  TEST_ENTRY(bezier_fit)
 
   /* vec2 */
   TEST_ENTRY(MACRO_GLM_VEC2_ONE_INIT)

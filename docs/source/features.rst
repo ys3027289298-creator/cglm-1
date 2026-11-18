@@ -24,6 +24,7 @@ Features
 * easing functions
 * curves
 * curve interpolation helpers (SMC, deCasteljau...)
+* least squares bezier fitting (adaptive error, automatic degree raising)
 * helpers to convert cglm types to Apple's simd library to pass cglm types to Metal GL without packing them on both sides
 * ray intersection helpers
 * and others...

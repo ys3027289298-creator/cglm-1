@@ -32,6 +32,15 @@
    CGLM_INLINE versors glms_euler_yzx_quat(vec3s angles)
    CGLM_INLINE versors glms_euler_zxy_quat(vec3s angles)
    CGLM_INLINE versors glms_euler_zyx_quat(vec3s angles)
+   CGLM_INLINE float   glms_unwrap(float angle, float refAngle)
+   CGLM_INLINE vec3s   glms_euler_unwrap(vec3s angle, vec3s refAngle)
+   CGLM_INLINE void    glms_euler_keyframes_unwrap(vec3s *keyframes, size_t count)
+   CGLM_INLINE vec3s   glms_euler_lerp(vec3s from, vec3s to, float t)
+   CGLM_INLINE vec3s   glms_euler_lerpc(vec3s from, vec3s to, float t)
+   CGLM_INLINE versors glms_euler_quat_lerp(vec3s from,
+                                            vec3s to,
+                                            float t,
+                                            float *relAngle)
  */
 
 #ifndef cglms_euler_h
@@ -242,6 +251,112 @@ versors
 glms_euler_zyx_quat(vec3s angles) {
   versors dest;
   glm_euler_zyx_quat(angles.raw, dest.raw);
+  return dest;
+}
+
+/*!
+ * @brief unwrap an angle onto the shortest arc around a reference angle
+ *
+ * @param[in] angle    angle in radians (any range, may wrap)
+ * @param[in] refAngle reference angle in radians
+ * @returns unwrapped angle, within pi of refAngle
+ */
+CGLM_INLINE
+float
+glms_unwrap(float angle, float refAngle) {
+  return glm_unwrap(angle, refAngle);
+}
+
+/*!
+ * @brief unwrap each euler component onto the shortest arc
+ *        around a reference triple
+ *
+ * @param[in] angle    angles [x, y, z] in radians
+ * @param[in] refAngle reference angles [x, y, z] in radians
+ * @returns unwrapped angles
+ */
+CGLM_INLINE
+vec3s
+glms_euler_unwrap(vec3s angle, vec3s refAngle) {
+  vec3s dest;
+  glm_euler_unwrap(angle.raw, refAngle.raw, dest.raw);
+  return dest;
+}
+
+/*!
+ * @brief cumulatively unwrap an euler keyframe chain in place
+ *
+ * @param[in, out] keyframes euler keyframes in radians
+ * @param[in]      count     number of keyframes
+ */
+CGLM_INLINE
+void
+glms_euler_keyframes_unwrap(vec3s *keyframes, size_t count) {
+  size_t i;
+
+  if (count < 2)
+    return;
+
+  for (i = 1; i < count; i++) {
+    glm_euler_unwrap(keyframes[i].raw,
+                     keyframes[i - 1].raw,
+                     keyframes[i].raw);
+  }
+}
+
+/*!
+ * @brief shortest-arc linear interpolation between euler angle triples
+ *
+ * @param[in] from angles [x, y, z] in radians
+ * @param[in] to   angles [x, y, z] in radians
+ * @param[in] t    interpolant, 0 returns from, 1 returns unwrapped to
+ * @returns interpolated angles
+ */
+CGLM_INLINE
+vec3s
+glms_euler_lerp(vec3s from, vec3s to, float t) {
+  vec3s dest;
+  glm_euler_lerp(from.raw, to.raw, t, dest.raw);
+  return dest;
+}
+
+/*!
+ * @brief clamped variant of glms_euler_lerp()
+ *
+ * @param[in] from angles [x, y, z] in radians
+ * @param[in] to   angles [x, y, z] in radians
+ * @param[in] t    interpolant clamped between 0 and 1
+ * @returns interpolated angles
+ */
+CGLM_INLINE
+vec3s
+glms_euler_lerpc(vec3s from, vec3s to, float t) {
+  vec3s dest;
+  glm_euler_lerpc(from.raw, to.raw, t, dest.raw);
+  return dest;
+}
+
+/*!
+ * @brief dual-path shortest-arc interpolation between euler keyframes
+ *
+ * @param[in]  from     angles [x, y, z] in radians
+ * @param[in]  to       angles [x, y, z] in radians
+ * @param[in]  t        interpolant
+ * @param[out] relAngle geodesic angle between the euler-path and
+ *                      quaternion-path results (may be NULL)
+ * @returns interpolated orientation quaternion (euler path)
+ */
+CGLM_INLINE
+versors
+glms_euler_quat_lerp(vec3s from, vec3s to, float t, float *relAngle) {
+  versors dest;
+  float angle;
+
+  angle = glm_euler_quat_lerp(from.raw, to.raw, t, dest.raw);
+
+  if (relAngle)
+    *relAngle = angle;
+
   return dest;
 }
 

@@ -415,6 +415,23 @@ TEST_DECLARE(glmc_euler_zyx_quat_lh)
 
 TEST_DECLARE(euler)
 
+/* euler shortest-arc unwrap / interpolation */
+TEST_DECLARE(glm_unwrap)
+TEST_DECLARE(glm_euler_unwrap)
+TEST_DECLARE(glm_euler_keyframes_unwrap)
+TEST_DECLARE(glm_euler_unwrap_multiturn)
+TEST_DECLARE(glm_euler_lerp_short_arc)
+TEST_DECLARE(glm_euler_quat_lerp_crosscheck)
+TEST_DECLARE(glm_euler_lerp_perf)
+
+TEST_DECLARE(glmc_unwrap)
+TEST_DECLARE(glmc_euler_unwrap)
+TEST_DECLARE(glmc_euler_keyframes_unwrap)
+TEST_DECLARE(glmc_euler_unwrap_multiturn)
+TEST_DECLARE(glmc_euler_lerp_short_arc)
+TEST_DECLARE(glmc_euler_quat_lerp_crosscheck)
+TEST_DECLARE(glmc_euler_lerp_perf)
+
 /* ray */
 TEST_DECLARE(glm_ray_triangle)
 TEST_DECLARE(glm_ray_sphere)
@@ -1641,6 +1658,23 @@ TEST_LIST {
   TEST_ENTRY(glmc_euler_zyx_quat_lh)
 
   TEST_ENTRY(euler)
+
+  /* euler shortest-arc unwrap / interpolation */
+  TEST_ENTRY(glm_unwrap)
+  TEST_ENTRY(glm_euler_unwrap)
+  TEST_ENTRY(glm_euler_keyframes_unwrap)
+  TEST_ENTRY(glm_euler_unwrap_multiturn)
+  TEST_ENTRY(glm_euler_lerp_short_arc)
+  TEST_ENTRY(glm_euler_quat_lerp_crosscheck)
+  TEST_ENTRY(glm_euler_lerp_perf)
+
+  TEST_ENTRY(glmc_unwrap)
+  TEST_ENTRY(glmc_euler_unwrap)
+  TEST_ENTRY(glmc_euler_keyframes_unwrap)
+  TEST_ENTRY(glmc_euler_unwrap_multiturn)
+  TEST_ENTRY(glmc_euler_lerp_short_arc)
+  TEST_ENTRY(glmc_euler_quat_lerp_crosscheck)
+  TEST_ENTRY(glmc_euler_lerp_perf)
 
   /* ray */
   TEST_ENTRY(glm_ray_triangle)

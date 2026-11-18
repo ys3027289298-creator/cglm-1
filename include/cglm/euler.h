@@ -36,12 +36,32 @@
    CGLM_INLINE void glm_euler_yzx_quat(const vec3 angles, versor dest);
    CGLM_INLINE void glm_euler_zxy_quat(const vec3 angles, versor dest);
    CGLM_INLINE void glm_euler_zyx_quat(const vec3 angles, versor dest);
+   CGLM_INLINE float glm_unwrap(float angle, float refAngle);
+   CGLM_INLINE void glm_euler_unwrap(const vec3 angle,
+                                     const vec3 refAngle,
+                                     vec3 dest);
+   CGLM_INLINE void glm_euler_keyframes_unwrap(vec3 *keyframes, size_t count);
+   CGLM_INLINE void glm_euler_lerp(const vec3 from,
+                                   const vec3 to,
+                                   float t,
+                                   vec3 dest);
+   CGLM_INLINE void glm_euler_lerpc(const vec3 from,
+                                    const vec3 to,
+                                    float t,
+                                    vec3 dest);
+   CGLM_INLINE float glm_quat_rel_angle(const versor from, const versor to);
+   CGLM_INLINE float glm_euler_quat_lerp(const vec3 from,
+                                         const vec3 to,
+                                         float t,
+                                         versor dest);
  */
 
 #ifndef cglm_euler_h
 #define cglm_euler_h
 
 #include "common.h"
+#include "quat.h"
+#include "util.h"
 
 #ifdef CGLM_FORCE_LEFT_HANDED
 #  include "handed/euler_to_quat_lh.h"
@@ -576,6 +596,174 @@ glm_euler_zyx_quat(const vec3 angles, versor dest) {
 #else
   glm_euler_zyx_quat_rh(angles, dest);
 #endif
+}
+
+/*!
+ * @brief unwrap an angle so that it is the closest (shortest arc)
+ *        representative of @p angle around the reference angle
+ *
+ * The result is @p angle shifted by an integer multiple of 2*pi until
+ * the distance to @p refAngle is at most pi. This resolves the
+ * 359 deg -> 1 deg style discontinuity: instead of interpolating the
+ * long way around (-358 deg), the angle becomes 361 deg and the
+ * interpolated motion spans only +2 deg.
+ *
+ * @param[in]  angle    angle in radians (any range, may wrap)
+ * @param[in]  refAngle reference angle in radians (any range)
+ * @return unwrapped angle, within pi of @p refAngle
+ */
+CGLM_INLINE
+float
+glm_unwrap(float angle, float refAngle) {
+  return angle - GLM_TAUf * roundf((angle - refAngle) * GLM_1_TAUf);
+}
+
+/*!
+ * @brief unwrap each component of an euler angle triple onto the
+ *        shortest arc around a reference triple
+ *
+ * @param[in]  angle    angles [x, y, z] in radians (may wrap)
+ * @param[in]  refAngle reference angles [x, y, z] in radians
+ * @param[out] dest     unwrapped angles, each within pi of refAngle
+ */
+CGLM_INLINE
+void
+glm_euler_unwrap(const vec3 angle, const vec3 refAngle, vec3 dest) {
+  dest[0] = glm_unwrap(angle[0], refAngle[0]);
+  dest[1] = glm_unwrap(angle[1], refAngle[1]);
+  dest[2] = glm_unwrap(angle[2], refAngle[2]);
+}
+
+/*!
+ * @brief cumulatively unwrap an euler keyframe chain in place
+ *
+ * Each keyframe is shifted per component by whole 2*pi turns so that
+ * consecutive keyframes always differ by at most pi, i.e. the chain
+ * follows the shortest arc. Multi-turn rotations are preserved through
+ * the accumulated unwrap, so a chain spinning several turns keeps the
+ * total winding instead of snapping back at every wrap.
+ *
+ * @param[in, out] keyframes euler keyframes [x, y, z] in radians
+ * @param[in]      count     number of keyframes
+ */
+CGLM_INLINE
+void
+glm_euler_keyframes_unwrap(vec3 *keyframes, size_t count) {
+  size_t i;
+
+  if (count < 2)
+    return;
+
+  for (i = 1; i < count; i++) {
+    glm_euler_unwrap(keyframes[i], keyframes[i - 1], keyframes[i]);
+  }
+}
+
+/*!
+ * @brief linearly interpolate two euler angle triples along the
+ *        shortest arc
+ *
+ * The @p to angle is unwrapped onto the shortest arc around @p from
+ * before the per-component lerp, so an interpolation across the
+ * +/-pi boundary sweeps the small angle instead of almost a full
+ * revolution. The unwrapped target is also returned implicitly through
+ * @p dest at t == 1, making the function safe to call repeatedly while
+ * accumulating keyframes.
+ *
+ * @param[in]  from angles [x, y, z] in radians
+ * @param[in]  to   angles [x, y, z] in radians
+ * @param[in]  t    interpolant, 0 returns from, 1 returns unwrapped to
+ * @param[out] dest interpolated angles
+ */
+CGLM_INLINE
+void
+glm_euler_lerp(const vec3 from, const vec3 to, float t, vec3 dest) {
+  CGLM_ALIGN(8) vec3 target;
+
+  glm_euler_unwrap(to, from, target);
+
+  dest[0] = glm_lerp(from[0], target[0], t);
+  dest[1] = glm_lerp(from[1], target[1], t);
+  dest[2] = glm_lerp(from[2], target[2], t);
+}
+
+/*!
+ * @brief clamped variant of glm_euler_lerp(), @p t is clamped to [0, 1]
+ *
+ * @param[in]  from angles [x, y, z] in radians
+ * @param[in]  to   angles [x, y, z] in radians
+ * @param[in]  t    interpolant clamped between 0 and 1
+ * @param[out] dest interpolated angles
+ */
+CGLM_INLINE
+void
+glm_euler_lerpc(const vec3 from, const vec3 to, float t, vec3 dest) {
+  glm_euler_lerp(from, to, glm_clamp_zo(t), dest);
+}
+
+/*!
+ * @brief shortest rotation angle (geodesic distance) between two
+ *        unit quaternions, in radians and within [0, pi]
+ *
+ * @param[in] from quaternion
+ * @param[in] to   quaternion
+ * @return angle of the relative rotation in radians
+ */
+CGLM_INLINE
+float
+glm_quat_rel_angle(const versor from, const versor to) {
+  float d;
+
+  d = glm_quat_dot(from, to);
+
+  if (d < 0.0f)
+    d = -d;
+
+  /* clamp guards the acos domain against float round-off */
+  if (d > 1.0f)
+    d = 1.0f;
+
+  return 2.0f * acosf(d);
+}
+
+/*!
+ * @brief dual-path shortest-arc interpolation between euler keyframes
+ *
+ * Euler path: the target angles are unwrapped to the shortest arc and
+ * lerped, then converted to a quaternion. Quaternion path: the two
+ * keyframes are converted directly and slerped on the short way.
+ *
+ * The two paths always agree at the endpoints (t = 0 and t = 1). For
+ * interior interpolants they are different, equally valid curves:
+ * component-wise euler lerp is linear in angle while slerp has constant
+ * angular velocity, and for simultaneous multi-axis motion the gap can
+ * be large. The returned geodesic angle lets a caller cross-check the
+ * paths; prefer the quaternion dot product for a numerically stable
+ * equivalence test near the identity.
+ *
+ * @param[in]  from angles [x, y, z] in radians
+ * @param[in]  to   angles [x, y, z] in radians
+ * @param[in]  t    interpolant, 0 returns from, 1 returns to
+ * @param[out] dest interpolated orientation quaternion (euler path)
+ * @return geodesic angle in radians between the euler-path and
+ *         quaternion-path results
+ */
+CGLM_INLINE
+float
+glm_euler_quat_lerp(const vec3 from, const vec3 to, float t, versor dest) {
+  CGLM_ALIGN(16) versor qFrom, qTo, qSlerp;
+  CGLM_ALIGN(8)  vec3   angles;
+
+  /* euler path: shortest-arc unwrap, lerp, then convert to quaternion */
+  glm_euler_lerp(from, to, t, angles);
+  glm_euler_xyz_quat(angles, dest);
+
+  /* quaternion path: slerp always takes the short rotation itself */
+  glm_euler_xyz_quat(from, qFrom);
+  glm_euler_xyz_quat(to,   qTo);
+  glm_quat_slerp(qFrom, qTo, t, qSlerp);
+
+  return glm_quat_rel_angle(dest, qSlerp);
 }
 
 

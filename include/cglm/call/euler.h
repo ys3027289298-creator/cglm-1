@@ -73,6 +73,37 @@ CGLM_EXPORT
 void
 glmc_euler_zyx_quat(const vec3 angles, versor dest);
 
+CGLM_EXPORT
+float
+glmc_unwrap(float angle, float refAngle);
+
+CGLM_EXPORT
+void
+glmc_euler_unwrap(const vec3 angle, const vec3 refAngle, vec3 dest);
+
+CGLM_EXPORT
+void
+glmc_euler_keyframes_unwrap(vec3 *keyframes, size_t count);
+
+CGLM_EXPORT
+void
+glmc_euler_lerp(const vec3 from, const vec3 to, float t, vec3 dest);
+
+CGLM_EXPORT
+void
+glmc_euler_lerpc(const vec3 from, const vec3 to, float t, vec3 dest);
+
+CGLM_EXPORT
+float
+glmc_quat_rel_angle(const versor from, const versor to);
+
+CGLM_EXPORT
+float
+glmc_euler_quat_lerp(const vec3 from,
+                     const vec3 to,
+                     float t,
+                     versor dest);
+
 
 #ifdef __cplusplus
 }

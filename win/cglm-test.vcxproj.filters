@@ -109,6 +109,9 @@
     <ClInclude Include="..\test\src\test_plane.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\test\src\test_palette.h">
+      <Filter>src</Filter>
+    </ClInclude>
     <ClInclude Include="..\test\src\test_project.h">
       <Filter>src</Filter>
     </ClInclude>

@@ -67,6 +67,7 @@ cglm_HEADERS = include/cglm/version.h \
                include/cglm/util.h \
                include/cglm/quat.h \
                include/cglm/plane.h \
+               include/cglm/palette.h \
                include/cglm/noise.h \
                include/cglm/frustum.h \
                include/cglm/box.h \
@@ -122,6 +123,7 @@ cglm_call_HEADERS = include/cglm/call/mat4.h \
                     include/cglm/call/quat.h \
                     include/cglm/call/euler.h \
                     include/cglm/call/plane.h \
+                    include/cglm/call/palette.h \
                     include/cglm/call/noise.h \
                     include/cglm/call/frustum.h \
                     include/cglm/call/box.h \
@@ -266,6 +268,7 @@ libcglm_la_SOURCES=\
     src/mat4x2.c \
     src/mat4x3.c \
     src/plane.c \
+    src/palette.c \
     src/noise.c \
     src/frustum.c \
     src/box.c \

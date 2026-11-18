@@ -373,6 +373,16 @@ TEST_DECLARE(glmc_project)
 TEST_DECLARE(glm_plane_normalize)
 TEST_DECLARE(glmc_plane_normalize)
 
+/* palette */
+TEST_DECLARE(glm_palette_worlds)
+TEST_DECLARE(glm_palette_build)
+TEST_DECLARE(glm_palette_build_bounds)
+TEST_DECLARE(glm_palette_build_perf)
+TEST_DECLARE(glmc_palette_worlds)
+TEST_DECLARE(glmc_palette_build)
+TEST_DECLARE(glmc_palette_build_bounds)
+TEST_DECLARE(glmc_palette_build_perf)
+
 /* noise */
 TEST_DECLARE(glm_perlin_vec4)
 TEST_DECLARE(glmc_perlin_vec4)
@@ -1599,6 +1609,16 @@ TEST_LIST {
   /* plane */
   TEST_ENTRY(glm_plane_normalize)
   TEST_ENTRY(glmc_plane_normalize)
+
+  /* palette */
+  TEST_ENTRY(glm_palette_worlds)
+  TEST_ENTRY(glm_palette_build)
+  TEST_ENTRY(glm_palette_build_bounds)
+  TEST_ENTRY(glm_palette_build_perf)
+  TEST_ENTRY(glmc_palette_worlds)
+  TEST_ENTRY(glmc_palette_build)
+  TEST_ENTRY(glmc_palette_build_bounds)
+  TEST_ENTRY(glmc_palette_build_perf)
 
   /* noise */
   TEST_ENTRY(glm_perlin_vec4)

@@ -85,6 +85,7 @@
     <ClCompile Include="..\src\project.c" />
     <ClCompile Include="..\src\quat.c" />
     <ClCompile Include="..\src\ray.c" />
+    <ClCompile Include="..\src\polar.c" />
     <ClCompile Include="..\src\sphere.c" />
     <ClCompile Include="..\src\vec2.c" />
     <ClCompile Include="..\src\vec3.c" />

@@ -24,6 +24,7 @@
 #include "mat2.h"
 #include "mat2x3.h"
 #include "mat2x4.h"
+#include "polar.h"
 #include "affine.h"
 #include "cam.h"
 #include "frustum.h"

@@ -79,6 +79,7 @@ cglm_HEADERS = include/cglm/version.h \
                include/cglm/bezier.h \
                include/cglm/applesimd.h \
                include/cglm/ray.h \
+               include/cglm/polar.h \
                include/cglm/affine2d.h \
                include/cglm/affine2d-post.h
 
@@ -131,6 +132,7 @@ cglm_call_HEADERS = include/cglm/call/mat4.h \
                     include/cglm/call/curve.h \
                     include/cglm/call/bezier.h \
                     include/cglm/call/ray.h \
+                    include/cglm/call/polar.h \
                     include/cglm/call/affine.h \
                     include/cglm/call/affine2d.h \
                     include/cglm/call/aabb2d.h
@@ -275,6 +277,7 @@ libcglm_la_SOURCES=\
     src/curve.c \
     src/bezier.c \
     src/ray.c \
+    src/polar.c \
     src/affine2d.c \
     src/aabb2d.c \
     src/clipspace/ortho_lh_no.c \

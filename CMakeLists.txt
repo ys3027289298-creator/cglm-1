@@ -103,6 +103,7 @@ add_library(${PROJECT_NAME}
   src/curve.c
   src/bezier.c
   src/ray.c
+  src/polar.c
   src/affine2d.c
   src/clipspace/ortho_lh_no.c
   src/clipspace/ortho_lh_zo.c

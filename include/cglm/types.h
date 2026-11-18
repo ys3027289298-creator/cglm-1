@@ -110,6 +110,20 @@ typedef enum glm_euler_seq {
   GLM_EULER_ZYX = 2 << 0 | 1 << 2 | 0 << 4
 } glm_euler_seq;
 
+/*!
+ * @brief status codes returned by glm_polar3() / glmc_polar3()
+ *
+ * The condition number of the input is always reported through the
+ * function's cond parameter; this status tells how much to trust the
+ * decomposition itself.
+ */
+typedef enum glm_polar_status {
+  GLM_POLAR_OK              = 0, /* converged, input is well conditioned      */
+  GLM_POLAR_ILL_CONDITIONED = 1, /* converged, but cond(m) is huge; see cond  */
+  GLM_POLAR_NO_CONVERGE     = 2, /* iteration cap reached before convergence  */
+  GLM_POLAR_SINGULAR        = 3  /* (numerically) singular; cond is INFINITY  */
+} glm_polar_status;
+
 /*
   Important: cglm stores quaternion as [x, y, z, w] in memory since v0.4.0 
   it was [w, x, y, z] before v0.4.0 ( v0.3.5 and earlier ). w is real part.

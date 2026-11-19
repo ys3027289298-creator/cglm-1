@@ -239,7 +239,14 @@ glm_vec4_one(vec4 v) {
 CGLM_INLINE
 float
 glm_vec4_dot(const vec4 a, const vec4 b) {
-#if defined(CGLM_SIMD)
+#if defined(CGLM_RT_DISPATCH)
+  /* AVX level uses the inline SSE2 kernel: a non-inlined VEX-128 call
+     costs more than the re-encoding saves (measured, see
+     docs/source/runtime-dispatch.rst) */
+  if (cglm_simd_level() == CGLM_SIMD_LEVEL_SCALAR)
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
+  return glmm_dot(glmm_load(a), glmm_load(b));
+#elif defined(CGLM_SIMD)
   return glmm_dot(glmm_load(a), glmm_load(b));
 #else
   return a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
@@ -274,7 +281,12 @@ glm_vec4_norm2(const vec4 v) {
 CGLM_INLINE
 float
 glm_vec4_norm(const vec4 v) {
-#if defined(CGLM_SIMD)
+#if defined(CGLM_RT_DISPATCH)
+  /* see glm_vec4_dot: AVX level uses the inline SSE2 kernel */
+  if (cglm_simd_level() == CGLM_SIMD_LEVEL_SCALAR)
+    return sqrtf(glm_vec4_dot(v, v));
+  return glmm_norm(glmm_load(v));
+#elif defined(CGLM_SIMD)
   return glmm_norm(glmm_load(v));
 #else
   return sqrtf(glm_vec4_dot(v, v));

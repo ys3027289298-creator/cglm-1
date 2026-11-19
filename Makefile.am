@@ -155,7 +155,12 @@ cglm_simddir=$(includedir)/cglm/simd
 cglm_simd_HEADERS = include/cglm/simd/intrin.h \
                     include/cglm/simd/x86.h \
                     include/cglm/simd/arm.h \
-                    include/cglm/simd/wasm.h
+                    include/cglm/simd/wasm.h \
+                    include/cglm/simd/dispatch.h
+
+cglm_simd_x86rtdir=$(includedir)/cglm/simd/x86rt
+cglm_simd_x86rt_HEADERS = include/cglm/simd/x86rt/mat4.h \
+                          include/cglm/simd/x86rt/quat.h
 
 cglm_simd_sse2dir=$(includedir)/cglm/simd/sse2
 cglm_simd_sse2_HEADERS = include/cglm/simd/sse2/affine.h \

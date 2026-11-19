@@ -8,6 +8,7 @@ set(TESTFILES
   src/test_struct.c
   src/test_clamp.c
   src/test_common.c
+  src/test_simd_dispatch.c
   src/tests.c
   )
 

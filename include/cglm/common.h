@@ -64,6 +64,7 @@
 
 #include "types.h"
 #include "simd/intrin.h"
+#include "simd/dispatch.h"
 
 #ifndef CGLM_USE_DEFAULT_EPSILON
 #  ifndef GLM_FLT_EPSILON

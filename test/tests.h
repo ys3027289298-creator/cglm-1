@@ -1240,6 +1240,11 @@ TEST_DECLARE(vec4s_black_init)
 TEST_DECLARE(vec4s_one_init)
 TEST_DECLARE(vec4s_zero_init)
 
+TEST_DECLARE(simd_dispatch_level)
+TEST_DECLARE(simd_dispatch_env_clamp)
+TEST_DECLARE(simd_dispatch_mat4)
+TEST_DECLARE(simd_dispatch_vec4_quat)
+
 /*****************************************************************************/
 
 TEST_LIST {
@@ -2464,6 +2469,12 @@ TEST_LIST {
   TEST_ENTRY(vec4s_black_init)
   TEST_ENTRY(vec4s_one_init)
   TEST_ENTRY(vec4s_zero_init)
+
+  /* runtime simd dispatch */
+  TEST_ENTRY(simd_dispatch_level)
+  TEST_ENTRY(simd_dispatch_env_clamp)
+  TEST_ENTRY(simd_dispatch_mat4)
+  TEST_ENTRY(simd_dispatch_vec4_quat)
 };
 
 #endif /* tests_h */

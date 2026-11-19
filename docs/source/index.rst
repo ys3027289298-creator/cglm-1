@@ -38,6 +38,7 @@ considered to be supported as optional.
    :caption: Options:
 
    opt
+   runtime-dispatch
 
 .. toctree::
    :maxdepth: 2

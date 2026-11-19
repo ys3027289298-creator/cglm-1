@@ -62,6 +62,10 @@
 #  include "simd/avx/mat4.h"
 #endif
 
+#ifdef CGLM_RT_DISPATCH
+#  include "simd/x86rt/mat4.h"
+#endif
+
 #ifdef CGLM_NEON_FP
 #  include "simd/neon/mat4.h"
 #endif
@@ -298,32 +302,11 @@ glm_mat4_ins3(CGLM_CONST mat3 mat, mat4 dest) {
   dest[2][2] = mat[2][2];
 }
 
-/*!
- * @brief multiply m1 and m2 to dest
- *
- * m1, m2 and dest matrices can be same matrix, it is possible to write this:
- *
- * @code
- * mat4 m = GLM_MAT4_IDENTITY_INIT;
- * glm_mat4_mul(m, m, m);
- * @endcode
- *
- * @param[in]  m1   left matrix
- * @param[in]  m2   right matrix
- * @param[out] dest destination matrix
- */
+/* scalar reference implementation of glm_mat4_mul, shared by the
+   compile-time fallback and the runtime dispatch */
 CGLM_INLINE
 void
-glm_mat4_mul(CGLM_CONST mat4 m1, CGLM_CONST mat4 m2, mat4 dest) {
-#if defined(__wasm__) && defined(__wasm_simd128__)
-  glm_mat4_mul_wasm(m1, m2, dest);
-#elif defined(__AVX__)
-  glm_mat4_mul_avx(m1, m2, dest);
-#elif defined( __SSE__ ) || defined( __SSE2__ )
-  glm_mat4_mul_sse2(m1, m2, dest);
-#elif defined(CGLM_NEON_FP)
-  glm_mat4_mul_neon(m1, m2, dest);
-#else
+glm__mat4_mul_scalar(CGLM_CONST mat4 m1, CGLM_CONST mat4 m2, mat4 dest) {
   float a00 = m1[0][0], a01 = m1[0][1], a02 = m1[0][2], a03 = m1[0][3],
         a10 = m1[1][0], a11 = m1[1][1], a12 = m1[1][2], a13 = m1[1][3],
         a20 = m1[2][0], a21 = m1[2][1], a22 = m1[2][2], a23 = m1[2][3],
@@ -350,6 +333,41 @@ glm_mat4_mul(CGLM_CONST mat4 m1, CGLM_CONST mat4 m2, mat4 dest) {
   dest[3][1] = a01 * b30 + a11 * b31 + a21 * b32 + a31 * b33;
   dest[3][2] = a02 * b30 + a12 * b31 + a22 * b32 + a32 * b33;
   dest[3][3] = a03 * b30 + a13 * b31 + a23 * b32 + a33 * b33;
+}
+
+/*!
+ * @brief multiply m1 and m2 to dest
+ *
+ * m1, m2 and dest matrices can be same matrix, it is possible to write this:
+ *
+ * @code
+ * mat4 m = GLM_MAT4_IDENTITY_INIT;
+ * glm_mat4_mul(m, m, m);
+ * @endcode
+ *
+ * @param[in]  m1   left matrix
+ * @param[in]  m2   right matrix
+ * @param[out] dest destination matrix
+ */
+CGLM_INLINE
+void
+glm_mat4_mul(CGLM_CONST mat4 m1, CGLM_CONST mat4 m2, mat4 dest) {
+#if defined(__wasm__) && defined(__wasm_simd128__)
+  glm_mat4_mul_wasm(m1, m2, dest);
+#elif defined(__AVX__)
+  glm_mat4_mul_avx(m1, m2, dest);
+#elif defined(CGLM_RT_DISPATCH)
+  switch (cglm_simd_level()) {
+    case CGLM_SIMD_LEVEL_AVX:  glm_mat4_mul_avx_rt(m1, m2, dest);  break;
+    case CGLM_SIMD_LEVEL_SSE2: glm_mat4_mul_sse2(m1, m2, dest);    break;
+    default:                   glm__mat4_mul_scalar(m1, m2, dest); break;
+  }
+#elif defined( __SSE__ ) || defined( __SSE2__ )
+  glm_mat4_mul_sse2(m1, m2, dest);
+#elif defined(CGLM_NEON_FP)
+  glm_mat4_mul_neon(m1, m2, dest);
+#else
+  glm__mat4_mul_scalar(m1, m2, dest);
 #endif
 }
 
@@ -399,6 +417,20 @@ void
 glm_mat4_mulv(CGLM_CONST mat4 m, const vec4 v, vec4 dest) {
 #if defined(__wasm__) && defined(__wasm_simd128__)
   glm_mat4_mulv_wasm(m, v, dest);
+#elif defined(CGLM_RT_DISPATCH)
+  /* AVX level uses the inline SSE2 kernel: a non-inlined VEX-128 call
+     costs more than the re-encoding saves here (measured, see
+     docs/source/runtime-dispatch.rst) */
+  if (cglm_simd_level() == CGLM_SIMD_LEVEL_SCALAR) {
+    vec4 res;
+    res[0] = m[0][0] * v[0] + m[1][0] * v[1] + m[2][0] * v[2] + m[3][0] * v[3];
+    res[1] = m[0][1] * v[0] + m[1][1] * v[1] + m[2][1] * v[2] + m[3][1] * v[3];
+    res[2] = m[0][2] * v[0] + m[1][2] * v[1] + m[2][2] * v[2] + m[3][2] * v[3];
+    res[3] = m[0][3] * v[0] + m[1][3] * v[1] + m[2][3] * v[2] + m[3][3] * v[3];
+    glm_vec4_copy(res, dest);
+  } else {
+    glm_mat4_mulv_sse2(m, v, dest);
+  }
 #elif defined( __SSE__ ) || defined( __SSE2__ )
   glm_mat4_mulv_sse2(m, v, dest);
 #elif defined(CGLM_NEON_FP)
@@ -641,29 +673,18 @@ glm_mat4_det(CGLM_CONST mat4 mat) {
 #endif
 }
 
-/*!
- * @brief inverse mat4 and store in dest
- *
- * @param[in]  mat  matrix
- * @param[out] dest inverse matrix
- */
+/* scalar reference implementation of glm_mat4_inv, shared by the
+   compile-time fallback and the runtime dispatch */
 CGLM_INLINE
 void
-glm_mat4_inv(CGLM_CONST mat4 mat, mat4 dest) {
-#if defined(__wasm__) && defined(__wasm_simd128__)
-  glm_mat4_inv_wasm(mat, dest);
-#elif defined( __SSE__ ) || defined( __SSE2__ )
-  glm_mat4_inv_sse2(mat, dest);
-#elif defined(CGLM_NEON_FP)
-  glm_mat4_inv_neon(mat, dest);
-#else
+glm__mat4_inv_scalar(CGLM_CONST mat4 mat, mat4 dest) {
   float a = mat[0][0], b = mat[0][1], c = mat[0][2], d = mat[0][3],
         e = mat[1][0], f = mat[1][1], g = mat[1][2], h = mat[1][3],
         i = mat[2][0], j = mat[2][1], k = mat[2][2], l = mat[2][3],
         m = mat[3][0], n = mat[3][1], o = mat[3][2], p = mat[3][3],
 
         c1  = k * p - l * o,  c2  = c * h - d * g,  c3  = i * p - l * m,
-        c4  = a * h - d * e,  c5  = j * p - l * n,  c6  = b * h - d * f, 
+        c4  = a * h - d * e,  c5  = j * p - l * n,  c6  = b * h - d * f,
         c7  = i * n - j * m,  c8  = a * f - b * e,  c9  = j * o - k * n,
         c10 = b * g - c * f,  c11 = i * o - k * m,  c12 = a * g - c * e,
 
@@ -688,6 +709,31 @@ glm_mat4_inv(CGLM_CONST mat4 mat, mat4 dest) {
   dest[3][1] = (a * c9  - b * c11 + c * c7)  * idt;
   dest[3][2] = (m * c10 - n * c12 + o * c8)  * ndt;
   dest[3][3] = (i * c10 - j * c12 + k * c8)  * idt;
+}
+
+/*!
+ * @brief inverse mat4 and store in dest
+ *
+ * @param[in]  mat  matrix
+ * @param[out] dest inverse matrix
+ */
+CGLM_INLINE
+void
+glm_mat4_inv(CGLM_CONST mat4 mat, mat4 dest) {
+#if defined(__wasm__) && defined(__wasm_simd128__)
+  glm_mat4_inv_wasm(mat, dest);
+#elif defined(CGLM_RT_DISPATCH)
+  switch (cglm_simd_level()) {
+    case CGLM_SIMD_LEVEL_AVX:  glm_mat4_inv_avx_rt(mat, dest);  break;
+    case CGLM_SIMD_LEVEL_SSE2: glm_mat4_inv_sse2(mat, dest);    break;
+    default:                   glm__mat4_inv_scalar(mat, dest); break;
+  }
+#elif defined( __SSE__ ) || defined( __SSE2__ )
+  glm_mat4_inv_sse2(mat, dest);
+#elif defined(CGLM_NEON_FP)
+  glm_mat4_inv_neon(mat, dest);
+#else
+  glm__mat4_inv_scalar(mat, dest);
 #endif
 }
 

@@ -67,6 +67,10 @@
 #  include "simd/sse2/quat.h"
 #endif
 
+#ifdef CGLM_RT_DISPATCH
+#  include "simd/x86rt/quat.h"
+#endif
+
 #ifdef CGLM_NEON_FP
 #  include "simd/neon/quat.h"
 #endif
@@ -467,6 +471,16 @@ glm_quat_mul(const versor p, const versor q, versor dest) {
    */
 #if defined(__wasm__) && defined(__wasm_simd128__)
   glm_quat_mul_wasm(p, q, dest);
+#elif defined(CGLM_RT_DISPATCH)
+  switch (cglm_simd_level()) {
+    case CGLM_SIMD_LEVEL_AVX:  glm_quat_mul_avx_rt(p, q, dest); break;
+    case CGLM_SIMD_LEVEL_SSE2: glm_quat_mul_sse2(p, q, dest);   break;
+    default:
+      dest[0] = p[3] * q[0] + p[0] * q[3] + p[1] * q[2] - p[2] * q[1];
+      dest[1] = p[3] * q[1] - p[0] * q[2] + p[1] * q[3] + p[2] * q[0];
+      dest[2] = p[3] * q[2] + p[0] * q[1] - p[1] * q[0] + p[2] * q[3];
+      dest[3] = p[3] * q[3] - p[0] * q[0] - p[1] * q[1] - p[2] * q[2];
+  }
 #elif defined( __SSE__ ) || defined( __SSE2__ )
   glm_quat_mul_sse2(p, q, dest);
 #elif defined(CGLM_NEON_FP)
